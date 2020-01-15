@@ -37,5 +37,54 @@ module.exports = {
     }
 
     return res.json(dev);
+  },
+  
+  async update(req, res) {
+    const { _id } = req.params;
+    const { longitude, latitude, techs } = req.body;
+
+    const dev = await Dev.findById(_id);
+
+    if (!dev) {
+      return res.status(404).json({ error: { message: 'Dev not found' } })
+    }
+
+    const response = await api.get(`/users/${dev.github_username}`);
+
+    const { name = login, avatar_url, bio } = response.data;
+    const techsArray = parseStringAsArray(techs);
+    
+    const location = {
+      type: 'Point',
+      coordinates: [longitude, latitude],
+    };
+
+    await dev.update({
+      name,
+      avatar_url,
+      bio,
+      techs: [...dev.techs, ...techsArray],
+      location,
+    }, {
+
+    });
+
+    const updatedDev = await Dev.findById(_id);
+
+    return res.json(updatedDev);
+  },
+  
+  async destroy(req, res) {
+    const { _id } = req.params;
+
+    const dev = await Dev.findById(_id);
+
+    if (!dev) {
+      return res.status(404).json({ error: { message: 'Dev not found' } })
+    }
+
+    await dev.remove();
+
+    return res.json();
   }
 }

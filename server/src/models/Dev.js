@@ -10,7 +10,7 @@ const DevSchema = new Schema({
   techs: [String],
   location: {
     type: PointSchema,
-    index: '2dsphere',
+    indexes: ['2dsphere'],
   },
 }, {
   timestamps: true,
